@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"strings"
 
-	"github.com/Chain-Zhang/pinyin"
 	"github.com/answerdev/answer/internal/base/reason"
 	"github.com/answerdev/answer/internal/entity"
 	"github.com/answerdev/answer/internal/schema"
@@ -106,17 +105,18 @@ func (us *UserCommon) FormatUserBasicInfo(ctx context.Context, userInfo *entity.
 // Generate a unique Username based on the displayName
 func (us *UserCommon) MakeUsername(ctx context.Context, displayName string) (username string, err error) {
 	// Chinese processing
-	if has := checker.IsChinese(displayName); has {
-		str, err := pinyin.New(displayName).Split("").Mode(pinyin.WithoutTone).Convert()
-		if err != nil {
-			return "", errors.BadRequest(reason.UsernameInvalid)
-		} else {
-			displayName = str
-		}
-	}
+	// if has := checker.IsChinese(displayName); has {
+	// 	str, err := pinyin.New(displayName).Split("").Mode(pinyin.WithoutTone).Convert()
+	// 	if err != nil {
+	// 		return "", errors.BadRequest(reason.UsernameInvalid)
+	// 	} else {
+	// 		displayName = str
+	// 	}
+	// }
 
-	username = strings.ReplaceAll(displayName, " ", "_")
-	username = strings.ToLower(username)
+	username = strings.ReplaceAll(displayName, "@", "_")
+	username = strings.ReplaceAll(username, " ", "_")
+	// username = strings.ToLower(username)
 	suffix := ""
 
 	if checker.IsInvalidUsername(username) {

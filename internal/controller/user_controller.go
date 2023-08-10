@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/answerdev/answer/internal/base/handler"
 	"github.com/answerdev/answer/internal/base/middleware"
 	"github.com/answerdev/answer/internal/base/reason"
 	"github.com/answerdev/answer/internal/base/translator"
 	"github.com/answerdev/answer/internal/base/validator"
+	"github.com/answerdev/answer/internal/entity"
 	"github.com/answerdev/answer/internal/schema"
 	"github.com/answerdev/answer/internal/service"
 	"github.com/answerdev/answer/internal/service/action"
@@ -57,17 +60,26 @@ func NewUserController(
 // @Success 200 {object} handler.RespBody{data=schema.GetUserToSetShowResp}
 // @Router /answer/api/v1/user/info [get]
 func (uc *UserController) GetUserInfoByUserID(ctx *gin.Context) {
+	var (
+		userInfo *entity.UserCacheInfo
+		err      error
+	)
 	token := middleware.ExtractToken(ctx)
+	fmt.Println("token is ", token)
 	if len(token) == 0 {
-		handler.HandleResponse(ctx, nil, nil)
-		return
-	}
-
-	// if user is no login return null in data
-	userInfo, _ := uc.authService.GetUserCacheInfo(ctx, token)
-	if userInfo == nil {
-		handler.HandleResponse(ctx, nil, nil)
-		return
+		userInfo, token, err = uc.authService.GetQyUserInfo(ctx, ctx.Request)
+		if err != nil {
+			log.Warn("获取轻云用户失败", err)
+			handler.HandleResponse(ctx, nil, nil)
+			return
+		}
+	} else {
+		// if user is no login return null in data
+		userInfo, _ = uc.authService.GetUserCacheInfo(ctx, token)
+		if userInfo == nil {
+			handler.HandleResponse(ctx, nil, nil)
+			return
+		}
 	}
 
 	resp, err := uc.userService.GetUserInfoByUserID(ctx, token, userInfo.UserID)

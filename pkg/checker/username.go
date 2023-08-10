@@ -7,5 +7,6 @@ var (
 )
 
 func IsInvalidUsername(username string) bool {
-	return !usernameReg.MatchString(username)
+	return false
+	// return !usernameReg.MatchString(username)
 }

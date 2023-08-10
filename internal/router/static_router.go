@@ -19,5 +19,5 @@ func NewStaticRouter(serviceConfig *service_config.ServiceConfig) *StaticRouter 
 
 // RegisterStaticRouter register static api router
 func (a *StaticRouter) RegisterStaticRouter(r *gin.RouterGroup) {
-	r.Static("/uploads", a.serviceConfig.UploadPath)
+	r.Static("/answer/uploads", a.serviceConfig.UploadPath)
 }

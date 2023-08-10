@@ -10,10 +10,9 @@ import { floppyNavigation } from '@/utils';
 interface Props {
   redDot: Type.NotificationStatus | undefined;
   userInfo;
-  logOut: () => void;
 }
 
-const Index: FC<Props> = ({ redDot, userInfo, logOut }) => {
+const Index: FC<Props> = ({ redDot, userInfo }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const handleLinkClick = (evt) => {
@@ -85,9 +84,6 @@ const Index: FC<Props> = ({ redDot, userInfo, logOut }) => {
             </Dropdown.Item>
           ) : null}
           <Dropdown.Divider />
-          <Dropdown.Item onClick={logOut}>
-            {t('header.nav.logout')}
-          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
     </>

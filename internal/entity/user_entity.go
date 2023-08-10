@@ -27,7 +27,7 @@ type User struct {
 	LastLoginDate  time.Time `xorm:"TIMESTAMP last_login_date"`
 	Username       string    `xorm:"not null default '' VARCHAR(50) UNIQUE username"`
 	Pass           string    `xorm:"not null default '' VARCHAR(255) pass"`
-	EMail          string    `xorm:"not null VARCHAR(100) e_mail"`
+	EMail          string    `xorm:"not null VARCHAR(100) e_mail UNIQUE e_mail"`
 	MailStatus     int       `xorm:"not null default 2 TINYINT(4) mail_status"`
 	NoticeStatus   int       `xorm:"not null default 2 INT(11) notice_status"`
 	FollowCount    int       `xorm:"not null default 0 INT(11) follow_count"`

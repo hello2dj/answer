@@ -14,6 +14,7 @@ import (
 	"github.com/answerdev/answer/pkg/converter"
 	"github.com/gin-gonic/gin"
 	"github.com/segmentfault/pacman/errors"
+	"github.com/segmentfault/pacman/log"
 )
 
 var ctxUUIDKey = "ctxUuidKey"
@@ -37,18 +38,28 @@ func NewAuthUserMiddleware(
 // Auth get token and auth user, set user info to context if user is already login
 func (am *AuthUserMiddleware) Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		var (
+			user *entity.UserCacheInfo
+			err  error
+		)
 		token := ExtractToken(ctx)
 		if len(token) == 0 {
-			ctx.Next()
-			return
+			user, _, err = am.authService.GetQyUserInfo(ctx, ctx.Request)
+			if err != nil {
+				log.Debugf("获取轻云用户失败: %+v", err)
+				ctx.Next()
+				return
+			}
+		} else {
+			user, err = am.authService.GetUserCacheInfo(ctx, token)
+			if err != nil {
+				ctx.Next()
+				return
+			}
 		}
-		userInfo, err := am.authService.GetUserCacheInfo(ctx, token)
-		if err != nil {
-			ctx.Next()
-			return
-		}
-		if userInfo != nil {
-			ctx.Set(ctxUUIDKey, userInfo)
+
+		if user != nil {
+			ctx.Set(ctxUUIDKey, user)
 		}
 		ctx.Next()
 	}
@@ -80,35 +91,44 @@ func (am *AuthUserMiddleware) EjectUserBySiteInfo() gin.HandlerFunc {
 // MustAuth auth user info. If the user does not log in, an unauthenticated error is displayed
 func (am *AuthUserMiddleware) MustAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		var (
+			userInfo *entity.UserCacheInfo
+			err      error
+		)
 		token := ExtractToken(ctx)
 		if len(token) == 0 {
-			handler.HandleResponse(ctx, errors.Unauthorized(reason.UnauthorizedError), nil)
-			ctx.Abort()
-			return
+			userInfo, token, err = am.authService.GetQyUserInfo(ctx, ctx.Request)
+			if err != nil {
+				log.Debugf("获取轻云用户失败: %+v", err)
+				ctx.Abort()
+				return
+			}
+		} else {
+			userInfo, err := am.authService.GetUserCacheInfo(ctx, token)
+			if err != nil || userInfo == nil {
+				handler.HandleResponse(ctx, errors.Unauthorized(reason.UnauthorizedError), nil)
+				ctx.Abort()
+				return
+			}
+			if userInfo.EmailStatus != entity.EmailStatusAvailable {
+				handler.HandleResponse(ctx, errors.Forbidden(reason.EmailNeedToBeVerified),
+					&schema.ForbiddenResp{Type: schema.ForbiddenReasonTypeInactive})
+				ctx.Abort()
+				return
+			}
+			if userInfo.UserStatus == entity.UserStatusSuspended {
+				handler.HandleResponse(ctx, errors.Forbidden(reason.UserSuspended),
+					&schema.ForbiddenResp{Type: schema.ForbiddenReasonTypeUserSuspended})
+				ctx.Abort()
+				return
+			}
+			if userInfo.UserStatus == entity.UserStatusDeleted {
+				handler.HandleResponse(ctx, errors.Unauthorized(reason.UnauthorizedError), nil)
+				ctx.Abort()
+				return
+			}
 		}
-		userInfo, err := am.authService.GetUserCacheInfo(ctx, token)
-		if err != nil || userInfo == nil {
-			handler.HandleResponse(ctx, errors.Unauthorized(reason.UnauthorizedError), nil)
-			ctx.Abort()
-			return
-		}
-		if userInfo.EmailStatus != entity.EmailStatusAvailable {
-			handler.HandleResponse(ctx, errors.Forbidden(reason.EmailNeedToBeVerified),
-				&schema.ForbiddenResp{Type: schema.ForbiddenReasonTypeInactive})
-			ctx.Abort()
-			return
-		}
-		if userInfo.UserStatus == entity.UserStatusSuspended {
-			handler.HandleResponse(ctx, errors.Forbidden(reason.UserSuspended),
-				&schema.ForbiddenResp{Type: schema.ForbiddenReasonTypeUserSuspended})
-			ctx.Abort()
-			return
-		}
-		if userInfo.UserStatus == entity.UserStatusDeleted {
-			handler.HandleResponse(ctx, errors.Unauthorized(reason.UnauthorizedError), nil)
-			ctx.Abort()
-			return
-		}
+
 		ctx.Set(ctxUUIDKey, userInfo)
 		ctx.Next()
 	}
@@ -182,5 +202,9 @@ func ExtractToken(ctx *gin.Context) (token string) {
 	if len(token) == 0 {
 		token = ctx.Query("Authorization")
 	}
-	return strings.TrimPrefix(token, "Bearer ")
+	token = strings.TrimPrefix(token, "Bearer ")
+	if strings.HasPrefix(token, "qy-") || token == "access-token" {
+		return ""
+	}
+	return token
 }

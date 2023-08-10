@@ -200,7 +200,7 @@ func (us *UploaderService) uploadFile(ctx *gin.Context, file *multipart.FileHead
 		return "", errors.BadRequest(reason.UploadFileUnsupportedFileFormat)
 	}
 
-	url = fmt.Sprintf("%s/uploads/%s", siteGeneral.SiteUrl, fileSubPath)
+	url = fmt.Sprintf("%s/answer/uploads/%s", siteGeneral.SiteUrl, fileSubPath)
 	return url, nil
 }
 

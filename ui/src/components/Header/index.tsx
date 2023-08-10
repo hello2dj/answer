@@ -28,7 +28,7 @@ import {
   loginSettingStore,
   themeSettingStore,
 } from '@/stores';
-import { logout, useQueryNotificationStatus } from '@/services';
+import { useQueryNotificationStatus } from '@/services';
 
 import NavItems from './components/NavItems';
 
@@ -39,7 +39,7 @@ const Header: FC = () => {
   const location = useLocation();
   const [urlSearch] = useSearchParams();
   const q = urlSearch.get('q');
-  const { user, clear: clearUserStore } = loggedUserInfoStore();
+  const { user } = loggedUserInfoStore();
   const { t } = useTranslation();
   const [searchStr, setSearch] = useState('');
   const siteInfo = siteInfoStore((state) => state.siteInfo);
@@ -64,11 +64,6 @@ const Header: FC = () => {
     navigate(searchUrl);
   };
 
-  const handleLogout = async () => {
-    await logout();
-    clearUserStore();
-    window.location.replace(window.location.href);
-  };
   const onLoginClick = (evt) => {
     if (location.pathname === '/users/login') {
       evt.preventDefault();
@@ -142,29 +137,18 @@ const Header: FC = () => {
           {/* mobile nav */}
           <div className="d-flex lg-none align-items-center flex-lg-nowrap">
             {user?.username ? (
-              <NavItems redDot={redDot} userInfo={user} logOut={handleLogout} />
+              <NavItems redDot={redDot} userInfo={user} />
             ) : (
-              <>
-                <Button
-                  variant="link"
-                  className={classnames('me-2', {
-                    'link-light': navbarStyle === 'theme-colored',
-                    'link-primary': navbarStyle !== 'theme-colored',
-                  })}
-                  onClick={onLoginClick}
-                  href="/users/login">
-                  {t('btns.login')}
-                </Button>
-                {loginSetting.allow_new_registrations && (
-                  <Button
-                    variant={
-                      navbarStyle === 'theme-colored' ? 'light' : 'primary'
-                    }
-                    href="/users/register">
-                    {t('btns.signup')}
-                  </Button>
-                )}
-              </>
+              <Button
+                variant="link"
+                className={classnames('me-2', {
+                  'link-light': navbarStyle === 'theme-colored',
+                  'link-primary': navbarStyle !== 'theme-colored',
+                })}
+                onClick={onLoginClick}
+                href="/users/login">
+                {t('btns.login')}
+              </Button>
             )}
           </div>
         </div>
@@ -225,11 +209,7 @@ const Header: FC = () => {
                   </Link>
                 </Nav.Item>
 
-                <NavItems
-                  redDot={redDot}
-                  userInfo={user}
-                  logOut={handleLogout}
-                />
+                <NavItems redDot={redDot} userInfo={user} />
               </Nav>
             ) : (
               <>

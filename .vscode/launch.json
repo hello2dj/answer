@@ -1,0 +1,40 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "env": {
+                "INSTALL_PORT": "8090"
+            },
+            "name": "answer-init",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "args": [
+                "init",
+                "-C",
+                "/home/vm/workspace/answer/answer-data/"
+            ],
+            "program": "${workspaceFolder}/cmd/answer/",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "env": {
+                "QY_ADDR": "https://192.168.116.196:8081"
+            },
+            "name": "answer",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "args": [
+                "run",
+                "-C",
+                "/home/vm/workspace/answer/answer-data/"
+            ],
+            "program": "${workspaceFolder}/cmd/answer/",
+            "cwd": "${workspaceFolder}"
+        },
+    ]
+}
