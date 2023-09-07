@@ -63,7 +63,7 @@ const QuestionList: FC<Props> = ({ source, data, isLoading = false }) => {
                 className="bg-transparent py-3 px-0 border-start-0 border-end-0">
                 <h5 className="text-wrap text-break">
                   <NavLink
-                    to={pathFactory.questionLanding(li.id, li.url_title)}
+                    to={pathFactory.noHashQuestionLanding(li.id, li.url_title)}
                     className="link-dark">
                     {li.title}
                     {li.status === 2 ? ` [${t('closed')}]` : ''}

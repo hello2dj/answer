@@ -24,11 +24,11 @@ const Index: FC<IProps> = ({ type, qid, aid, title, slugTitle = '' }) => {
   const { t } = useTranslation();
   let baseUrl =
     type === 'question'
-      ? `${window.location.origin}${pathFactory.questionLanding(
+      ? `${window.location.origin}/answer/#/${pathFactory.questionLanding(
           qid,
           slugTitle,
         )}`
-      : `${window.location.origin}${pathFactory.answerLanding({
+      : `${window.location.origin}/answer/#/${pathFactory.answerLanding({
           questionId: qid,
           slugTitle,
           answerId: aid,

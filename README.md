@@ -1,3 +1,6 @@
+# 1. 增加鉴权
+# 2. 整体增加了 /answer 的前缀, 必须走代理才能访问
+
 <a href="https://answer.dev">
     <img alt="logo" src="docs/img/logo.svg" height="99px">
 </a>

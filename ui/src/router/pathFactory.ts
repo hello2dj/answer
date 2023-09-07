@@ -17,7 +17,7 @@ const tagInfo = (slugName: string) => {
 const tagEdit = (tagId: string) => {
   return urlcat('/tags/:tagId/edit', { tagId });
 };
-const questionLanding = (questionId: string, slugTitle: string = '') => {
+const noHashQuestionLanding = (questionId: string, slugTitle: string = '') => {
   const { seo } = seoSettingStore.getState();
   if (!questionId) {
     return slugTitle ? `/questions/null/${slugTitle}` : '/questions/null';
@@ -31,6 +31,9 @@ const questionLanding = (questionId: string, slugTitle: string = '') => {
   }
 
   return urlcat('/questions/:questionId', { questionId });
+};
+const questionLanding = (questionId: string, slugTitle: string = '') => {
+  return `#${noHashQuestionLanding(questionId, slugTitle)}`;
 };
 const answerLanding = (params: {
   questionId: string;
@@ -51,5 +54,6 @@ export const pathFactory = {
   tagInfo,
   tagEdit,
   questionLanding,
+  noHashQuestionLanding,
   answerLanding,
 };
